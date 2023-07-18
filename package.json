@@ -15,6 +15,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "bcryptjs": "^2.4.3",
     "body-parser": "^1.20.2",
     "bunyan": "^1.8.15",
     "bunyan-format": "^0.2.1",
@@ -30,6 +31,7 @@
     "pm2": "^5.3.0",
     "rate-limit-redis": "^3.0.2",
     "redis": "^4.6.7",
-    "response-time": "^2.3.2"
+    "response-time": "^2.3.2",
+    "twilio": "^4.14.0"
   }
 }
