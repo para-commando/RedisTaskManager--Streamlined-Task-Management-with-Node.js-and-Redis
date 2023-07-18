@@ -1,45 +1,42 @@
 const app = require('../app');
 const {
-  myEndPointMiddlewares,myEndPoint2Middlewares, myEndPoint3Middlewares
+  registerUserMiddlewares
 } = require('../Middlewares/Route-Middlewares/expressRateLimit.middleware');
 const Joi = require('joi');
 const {
-  processMappers,
-} = require('../../../sub-systems/Microservice-1/Process-Mappers/processMappers');
-const {
-  processMappers:processMappers2,
-} = require('../../../sub-systems/Microservice-2/Process-Mappers/processMappers');
-const {
-  processMappers: processMappers3,
-} = require('../../../sub-systems/Microservice-3/Process-Mappers/processMappers');
+  authenticationProcesses,
+} = require('../../../sub-systems/Authentication-System/Processes/process');
 const logger = require('../../../shared/src/configurations/logger.configurations');
 // API specific Rate-limiting Middleware
 app.post(
-  '/myEndPoint',
-  myEndPointMiddlewares.expressRateLimiterMiddleware,
+  '/routes/Task-Management-system/SubSystem/user-Authentication/register-user',
+  registerUserMiddlewares.expressRateLimiterMiddleware,
   async (req, res, next) => {
     try {
       const schema = Joi.object({
-        name: Joi.string().valid('Anirudh', 'Nayak').default(null),
-        demand: Joi.string()
-          .valid('Highest', 'High', 'Medium', 'Low')
-          .default(null),
-        myTaskStatus: Joi.string()
-          .valid('Not Started', 'In Progress', 'Completed', 'Unassigned')
-          .default(null),
+        userName: Joi.string().min(3).max(30).required(),
+        password: Joi.string().min(8).max(30).required(),
+        email: Joi.string().email().required(),
+        phoneNo: Joi.string().pattern(new RegExp('^[0-9]{10}$')).required(),
       });
-      const validationResult = schema.validate(req.body);
-      if (validationResult.error) {
-        logger.warn('This is a warning message.');
-        logger.error('This is an error message.');
-
-        res.sendStatus(400);
+      const validatedData = schema.validate(req.body);
+      if (validatedData?.error) {
+        throw {
+          status: 400,
+          message: 'Bad Request',
+          error: validatedData?.error,
+        };
       } else {
-        const response = await processMappers.process1(validationResult.value);
-        
-        logger.info("🚀 ~ file: microserviceRouters.js:31 ~ response:", response);
-        res.json({
-          response: response,
+        const { userName, email, password, phoneNo } = validatedData.value;
+        const response = await authenticationProcesses.createNewUser({
+          userName: userName,
+          email: email,
+          password: password,
+          phoneNo: phoneNo,
+        });
+        logger.info('🚀response: ', response);
+        res.status(200).json({
+          responseData: response,
         });
       }
     } catch (error) {
@@ -49,76 +46,7 @@ app.post(
     }
   }
 );
-app.post(
-  '/myEndPoint2',
-  myEndPoint2Middlewares.expressRateLimiterMiddleware,
-  async (req, res, next) => {
-    try {
-      const schema = Joi.object({
-        name: Joi.string().valid('Anirudh', 'Nayak').default(null),
-        demand: Joi.string()
-          .valid('Highest', 'High', 'Medium', 'Low')
-          .default(null),
-        myTaskStatus: Joi.string()
-          .valid('Not Started', 'In Progress', 'Completed', 'Unassigned')
-          .default(null),
-      });
-      const validationResult = schema.validate(req.body);
-      if (validationResult.error) {
-        logger.warn('This is a warning message.');
-        logger.error('This is an error message.');
-
-        res.sendStatus(400);
-      } else {
-        const response = await processMappers2.process1(validationResult.value);
-        
-        logger.info("🚀 ~ file: microserviceRouters.js:31 ~ response:", response);
-        res.json({
-          response: response,
-        });
-      }
-    } catch (error) {
-      logger.error('This is an error message.');
-
-      res.status(400).json({ error: error });
-    }
-  }
-);
-app.post(
-  '/myEndPoint3',
-  myEndPoint3Middlewares.expressRateLimiterMiddleware,
-  async (req, res, next) => {
-    try {
-      const schema = Joi.object({
-        name: Joi.string().valid('Anirudh', 'Nayak').default(null),
-        demand: Joi.string()
-          .valid('Highest', 'High', 'Medium', 'Low')
-          .default(null),
-        myTaskStatus: Joi.string()
-          .valid('Not Started', 'In Progress', 'Completed', 'Unassigned')
-          .default(null),
-      });
-      const validationResult = schema.validate(req.body);
-      if (validationResult.error) {
-        logger.warn('This is a warning message.');
-        logger.error('This is an error message.');
-
-        res.sendStatus(400);
-      } else {
-        const response = await processMappers3.process1(validationResult.value);
-        
-        logger.info("🚀 ~ file: microserviceRouters.js:31 ~ response:", response);
-        res.json({
-          response: response,
-        });
-      }
-    } catch (error) {
-      logger.error('This is an error message.');
-
-      res.status(400).json({ error: error });
-    }
-  }
-);
+ 
 
 app.listen(3000, () => {
   console.log('listening on port 3000');

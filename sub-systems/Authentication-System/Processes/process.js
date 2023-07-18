@@ -1,8 +1,8 @@
 const logger = require ('../../../shared/src/configurations/logger.configurations')
 
 
-module.exports.processes = {
-    coreProcess1: async (asd)=>{
+module.exports.authenticationProcesses = {
+    createNewUser: async (asd)=>{
         logger.info(`This is the function argument : ${asd}`);
 
         return asd
