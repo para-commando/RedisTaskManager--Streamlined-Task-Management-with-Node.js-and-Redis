@@ -1,13 +1,48 @@
 const app = require('../app');
 const {
-  registerUserMiddlewares
+  registerUserMiddlewares,loginUserMiddlewares,
 } = require('../Middlewares/Route-Middlewares/expressRateLimit.middleware');
 const Joi = require('joi');
 const {
   authenticationProcesses,
 } = require('../../../sub-systems/Authentication-System/Processes/process');
 const logger = require('../../../shared/src/configurations/logger.configurations');
-// API specific Rate-limiting Middleware
+
+app.post(
+  '/routes/Task-Management-system/SubSystem/user-Authentication/login-user',
+  loginUserMiddlewares.expressRateLimiterMiddleware,
+  async (req, res, next) => {
+    try {
+      const schema = Joi.object({
+        userName: Joi.string().min(3).max(30).required(),
+        password: Joi.string().min(8).max(30).required(),
+      });
+      const validatedData = schema.validate(req.body);
+      if (validatedData?.error) {
+        throw {
+          status: 400,
+          message: 'Bad Request',
+          error: validatedData?.error,
+        };
+      } else {
+        const { userName, password } = validatedData.value;
+        const response = await authenticationProcesses.loginUser({
+          userName: userName,
+          password: password,
+        });
+        logger.info('🚀response: ', response);
+        res.status(200).json({
+          responseData: response,
+        });
+      }
+    } catch (error) {
+      logger.error('This is an error message.');
+
+      res.status(400).json({ error: error });
+    }
+  }
+);
+
 app.post(
   '/routes/Task-Management-system/SubSystem/user-Authentication/register-user',
   registerUserMiddlewares.expressRateLimiterMiddleware,
