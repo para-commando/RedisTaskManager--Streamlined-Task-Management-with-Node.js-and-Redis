@@ -12,7 +12,32 @@ This README file provides a comprehensive and sophisticated overview of the API 
 
 ## Introduction
 
-This project showcases a microservice-based architecture for building scalable and modular backend systems. It aims to provide a foundation for building distributed applications with separate services for different functionalities.
+This is a Node.js, Express.js, and Redis-implemented task management system. It allows users to create, assign, and track tasks. The system also provides features for filtering tasks, searching for tasks, and updating task details.
+
+The system is designed to be scalable and secure. It uses a microservices architecture to decouple the different components of the system. This makes it easy to scale the system as needed. The system also uses Redis to store session data, which helps to improve security.
+
+The system is easy to use. The API documentation is clear and concise, and the system provides a user-friendly interface.
+
+### Features
+
+- Create, assign, and track tasks
+- Filter tasks by category, priority, assigned person, assignment status, work status, and sorting criteria
+- Search for tasks based on title keywords
+- Update task details
+- List all tasks under all the present categories
+- List all users or those users who have not been assigned any task
+- Create new task one at a time
+- Reset password post otp authentication
+- Register a new user
+- Login an existing user
+
+### Benefits
+
+- Helps users to stay organized and on track
+- Improves productivity
+- Reduces stress
+- Provides a centralized repository for tasks
+- Makes it easy to collaborate with others
 
 ## Middleware
 
