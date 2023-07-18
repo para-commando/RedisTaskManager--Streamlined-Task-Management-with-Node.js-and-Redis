@@ -1,7 +1,6 @@
-# Backend Microservice Architecture
+# RedisTaskManager: Streamlined Task Management with Node.js and Redis
 
-This repository demonstrates a sample backend microservice architecture using Node.js and Express.js.
-
+This README file provides a comprehensive and sophisticated overview of the API endpoints and their functionalities for the Node.js, Express.js, and Redis-implemented Task Management System. The project is architected as a microservices system, and it utilizes RESTful APIs, logging and monitoring, database integration, error handling, and authentication and authorization mechanisms to ensure scalability, security, and ease of maintenance.
 ## Table of Contents
 
 - [Introduction](#introduction)
