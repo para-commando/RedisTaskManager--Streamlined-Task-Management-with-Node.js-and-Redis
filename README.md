@@ -1,7 +1,6 @@
-# Backend Microservice Architecture
+# RedisTaskManager: Streamlined Task Management with Node.js and Redis
 
-This repository demonstrates a sample backend microservice architecture using Node.js and Express.js.
-
+This README file provides a comprehensive and sophisticated overview of the API endpoints and their functionalities for the Node.js, Express.js, and Redis-implemented Task Management System. The project is architected as a microservices system, and it utilizes RESTful APIs, logging and monitoring, database integration, error handling, and authentication and authorization mechanisms to ensure scalability, security, and ease of maintenance.
 ## Table of Contents
 
 - [Introduction](#introduction)
@@ -13,7 +12,32 @@ This repository demonstrates a sample backend microservice architecture using No
 
 ## Introduction
 
-This project showcases a microservice-based architecture for building scalable and modular backend systems. It aims to provide a foundation for building distributed applications with separate services for different functionalities.
+This is a Node.js, Express.js, and Redis-implemented task management system. It allows users to create, assign, and track tasks. The system also provides features for filtering tasks, searching for tasks, and updating task details.
+
+The system is designed to be scalable and secure. It uses a microservices architecture to decouple the different components of the system. This makes it easy to scale the system as needed. The system also uses Redis to store session data, which helps to improve security.
+
+The system is easy to use. The API documentation is clear and concise, and the system provides a user-friendly interface.
+
+### Features
+
+- Create, assign, and track tasks
+- Filter tasks by category, priority, assigned person, assignment status, work status, and sorting criteria
+- Search for tasks based on title keywords
+- Update task details
+- List all tasks under all the present categories
+- List all users or those users who have not been assigned any task
+- Create new task one at a time
+- Reset password post otp authentication
+- Register a new user
+- Login an existing user
+
+### Benefits
+
+- Helps users to stay organized and on track
+- Improves productivity
+- Reduces stress
+- Provides a centralized repository for tasks
+- Makes it easy to collaborate with others
 
 ## Middleware
 
@@ -35,36 +59,47 @@ Feel free to explore the individual middleware modules located in the 'Middlewar
 
 ## API Endpoints
 
-The API Gateway service includes multiple endpoints that interact with various microservices. Each endpoint is associated with specific rate-limiting middleware and request processing logic. Here are the details of the endpoints:
+The API Gateway service includes multiple endpoints that interact with various microservices. Each endpoint is associated with specific rate-limiting middleware and request processing logic. The base URL for all endpoints is `/routes/Task-Management-system/SubSystem`, and the API supports JSON data format for both request and response. Here are the details of the endpoints subsystem wise:
 
-### /myEndPoint
+### Authentication-subsystem
 
-- Description: This endpoint processes requests and interacts with Microservice 1.
-- HTTP Method: POST
-- Rate Limiting: The requests to this endpoint are rate-limited using the `expressRateLimiterMiddleware` middleware from the `myEndPointMiddlewares` module.
-- Request Body Validation: The incoming request body is validated against a predefined schema using the `Joi` library.
-- Request Processing: Upon successful validation, the request data is passed to the `processMappers.process1` function from Microservice 1's `processMappers` module for further processing.
-- Logging: Logging messages are generated using the `logger` module for different scenarios, such as warnings, errors, and informational messages.
+This Subsystem contains APIs for user authentication including OTP validated userName and Password recovery option, The base URL for all the endpoints in this subsystem is `/user-Authentication/`, the details of the endPoints in this are:
 
-### /myEndPoint2
+### 1. `/Register-user`
 
-- Description: This endpoint processes requests and interacts with Microservice 2.
-- HTTP Method: POST
-- Rate Limiting: The requests to this endpoint are rate-limited using the `expressRateLimiterMiddleware` middleware from the `myEndPoint2Middlewares` module.
-- Request Body Validation: The incoming request body is validated against a predefined schema using the `Joi` library.
-- Request Processing: Upon successful validation, the request data is passed to the `processMappers2.process1` function from Microservice 2's `processMappers` module for further processing.
-- Logging: Logging messages are generated using the `logger` module for different scenarios, such as warnings, errors, and informational messages.
+- Method: POST
+- Description: Creates a new user account by providing personal details in the request body. Upon successful registration, the user can use the same credentials to log in to the system.
+- Parameters:
+  - `userName` (string, required): The user's username.
+  - `email` (string, required): The user's email address.
+  - `password` (string, required): The user's password.
+  - `phoneNo` (string, required): The user's phone number.
+- Responses:
+  - `200`: User account created successfully.
+  - `409`: Conflict. Username already exists.
+  - `503`: Create new user process failed. Internal error in the process layer.
+- Sample Request:
 
-### /myEndPoint3
+```
+{
+  "userName": "Anirudh.Nayak",
+  "email": "myMail.example@example.com",
+  "password": "iWillNotTellYou9934",
+  "phoneNo": "9999999999"
+}
+```
 
-- Description: This endpoint processes requests and interacts with Microservice 3.
-- HTTP Method: POST
-- Rate Limiting: The requests to this endpoint are rate-limited using the `expressRateLimiterMiddleware` middleware from the `myEndPoint3Middlewares` module.
-- Request Body Validation: The incoming request body is validated against a predefined schema using the `Joi` library.
-- Request Processing: Upon successful validation, the request data is passed to the `processMappers3.process1` function from Microservice 3's `processMappers` module for further processing.
-- Logging: Logging messages are generated using the `logger` module for different scenarios, such as warnings, errors, and informational messages.
+- ProcessLogic:
 
-Feel free to explore the code in `microserviceRouters.js` for more details on the implementation of each endpoint and its associated middleware.
+        1. Hashes the provided password using bcrypt to securely store it in the system.
+
+        2. Checks if the provided username already exists in the system.
+
+        3. If the username already exists, it throws a Conflict error indicating that the username is already taken.
+
+        4. If the username is available, it saves the user's details, including the username, email, hashed password, and phone number, in the system.
+
+        5. Additionally, it stores the username and password separately for use in the forgot password functionality.
 
 ## Features
 
