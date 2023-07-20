@@ -1,6 +1,6 @@
 const app = require('../app');
 const {
-  registerUserMiddlewares, loginUserMiddlewares, sendOtpMiddlewares, verifyOtpMiddlewares, resetPasswordMiddlewares, listTaskMiddlewares
+  registerUserMiddlewares, loginUserMiddlewares, sendOtpMiddlewares, verifyOtpMiddlewares, resetPasswordMiddlewares, listTaskMiddlewares, listUsersMiddlewares
 } = require('../Middlewares/Route-Middlewares/expressRateLimit.middleware');
 const Joi = require('joi');
 const {
@@ -31,7 +31,39 @@ app.get(
   }
 );
 
-
+app.get(
+  '/routes/Task-Management-system/SubSystem/Listing/list/users',
+  listUsersMiddlewares.expressRateLimiterMiddleware,
+  async (req, res, next) => {
+    try {
+      const schema = Joi.object({
+        userType: Joi.string().valid('usersWithNoTasks').default(null),
+      });
+      const validatedData = schema.validate({
+        userType: req.query.userType,
+      });
+      if (validatedData?.error) {
+        throw {
+          status: 400,
+          message: 'Bad Request',
+          error: validatedData?.error,
+        };
+      } else {
+        const { userType } = validatedData.value;
+         const response = await listingProcesses.listUsers({
+          userType: userType,
+        });
+        logger.info('🚀response: ', response);
+        res.status(200).json({
+          responseData: response,
+        });
+      }
+     } catch (error) {
+      logger.error('This is an error message.');
+      res.status(400).json({ error: error });
+    }
+  }
+);
 
 // * * Authentication subsystem APIs ///////////////////////////////////
 
