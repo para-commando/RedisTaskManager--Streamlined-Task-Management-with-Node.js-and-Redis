@@ -3,6 +3,9 @@ const bcrypt = require('bcryptjs');
 require('dotenv').config();
 const redisClient = require('../../../shared/src/configurations/redis.configurations.js');
 const twilioSmsClient = require('../../../shared/src/configurations/twilioServices.configurations');
+const {
+    generateOTP,
+  } = require('../../../shared/src/configurations/Otp.configurations');
 module.exports.authenticationProcesses = {
     verifyOtp: async ({ phoneNo, otp }) => {
         try {
