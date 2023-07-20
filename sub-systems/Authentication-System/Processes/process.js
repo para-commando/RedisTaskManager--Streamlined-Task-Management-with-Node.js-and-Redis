@@ -7,6 +7,62 @@ const {
     generateOTP,
   } = require('../../../shared/src/configurations/Otp.configurations');
 module.exports.authenticationProcesses = {
+    changePassword: async ({ phoneNo, userName, password }) => {
+        try {
+            // Check if the user with the given phone number exists
+            const isExistingUser = await redisClient.exists(`user:${phoneNo}`);
+    
+            // Check if the user is allowed to change the password
+            const isUserAllowedToChangePassword = await redisClient.exists(
+                `user:${phoneNo}:allowedToChangePassword`
+            );
+    
+            // Check if the username exists in the Redis store
+            const isUsernameExists = await redisClient.exists(`user:${userName}`);
+    
+            // Check if the user is valid (existing, allowed to change password, and username exists)
+            const isValidUser = isExistingUser && isUserAllowedToChangePassword && isUsernameExists;
+    
+            if (isValidUser !== 1) {
+                throw {
+                    status: 401,
+                    message: 'Unauthorized',
+                    error: 'Invalid userName/phoneNo or user does not exist',
+                };
+            }
+    
+            if (isValidUser === 1) {
+                // Hash the new password
+                const hashedPassword = bcrypt.hashSync(
+                    password,
+                    Number(process.env.HASHING_ROUNDS)
+                );
+    
+                // Update the password for the user in Redis
+                await redisClient.hSet(`user:${userName}`, 'password', hashedPassword);
+                await redisClient.hSet(`user:${phoneNo}`, 'password', hashedPassword);
+    
+                // Send an SMS to the user confirming the password reset
+                const twilioResponse = await twilioSmsClient.messages.create({
+                    body: `Your password has been successfully reset. If not you, then please contact your administrator.`,
+                    from: process.env.TWILIO_PHONE_NUMBER,
+                    to: `+91${phoneNo}`,
+                });
+    
+                return {
+                    message: 'Password was successfully reset',
+                };
+            } else {
+                throw {
+                    status: 503,
+                    message: 'changePassword process failed',
+                    error: 'Internal error-process layer',
+                };
+            }
+        } catch (error) {
+            throw error;
+        }
+    },
     verifyOtp: async ({ phoneNo, otp }) => {
         try {
             // Check if the user with the given phone number exists
