@@ -247,6 +247,42 @@ This Subsystem contains APIs for user authentication including OTP validated use
 
         6. Sends a notification to the user confirming the successful password reset.
 
+### Listing-subsystem
+
+This Subsystem contains APIs for user authentication including OTP validated userName and Password recovery option, The base URL for all the endpoints in this subsystem is `/Listing/`, the details of the endPoints in this are:
+
+### 1. `/list/tasks`
+
+- Method: GET
+- Description: This API is used to list all tasks under all the present categories.
+- Parameters:
+   None.
+- Responses:
+  - `200`: Tasks listed successfully.
+  - `400`: Bad request.
+  - `503`: listTasks process failed. Internal error in the process layer.
+
+- ProcessLogic:
+
+        1. Fetch all categories containing tasks from the Redis database. 
+
+        2. Create a mapping of task IDs to their respective categories using an empty object (`taskIdMappedToCategories`).
+
+        3. Iterate through each category obtained in the first step.
+
+        4. For each category, fetch all task IDs stored in the current category set from Redis.
+
+        5. For each task ID obtained in the previous step, retrieve the corresponding task details from Redis.
+
+        6. Store the task details in an object (`taskDetailsObjects`) where keys represent the task IDs and values are the corresponding task details.
+
+        7. Map each category to the object containing the task details for tasks within that category.
+        
+        8. Return an object with a `message` key containing the final result (`taskIdMappedToCategories`).
+
+        9. Handle any errors that occur during the process and throw them for further handling in the calling code.
+
+
 ## Features
 
 - **Microservices**: The architecture is based on microservices, where each service represents a specific business functionality or feature.
