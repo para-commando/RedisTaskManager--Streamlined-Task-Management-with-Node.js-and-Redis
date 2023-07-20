@@ -1,12 +1,41 @@
 const app = require('../app');
 const {
-  registerUserMiddlewares, loginUserMiddlewares, sendOtpMiddlewares, verifyOtpMiddlewares, resetPasswordMiddlewares
+  registerUserMiddlewares, loginUserMiddlewares, sendOtpMiddlewares, verifyOtpMiddlewares, resetPasswordMiddlewares, listTaskMiddlewares
 } = require('../Middlewares/Route-Middlewares/expressRateLimit.middleware');
 const Joi = require('joi');
+const {
+  listingProcesses,
+} = require('../../../sub-systems/Listing-System/Processes/process');
 const {
   authenticationProcesses,
 } = require('../../../sub-systems/Authentication-System/Processes/process');
 const logger = require('../../../shared/src/configurations/logger.configurations');
+
+// * * Listing/Details subsystem APIs ///////////////////////////////////
+
+app.get(
+  '/routes/Task-Management-system/SubSystem/Listing/list/tasks',
+  listTaskMiddlewares.expressRateLimiterMiddleware,
+  async (req, res, next) => {
+    try {
+      
+         const response = await listingProcesses.listTasks( );
+        logger.info('🚀response: ', response);
+        res.status(200).json({
+          responseData: response,
+        });
+     } catch (error) {
+      logger.error('This is an error message.');
+      res.status(400).json({ error: error });
+    }
+  }
+);
+
+
+
+// * * Authentication subsystem APIs ///////////////////////////////////
+
+
 app.post(
   '/routes/Task-Management-system/SubSystem/user-Authentication/reset-Password',
   resetPasswordMiddlewares.expressRateLimiterMiddleware,
