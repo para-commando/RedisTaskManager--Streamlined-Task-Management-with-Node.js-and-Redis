@@ -422,6 +422,56 @@ This Subsystem contains API for task creation, The base URL for all the endpoint
 
         10. If any errors occur during the execution of the code (e.g., Redis connection issues or other exceptions), the `catch` block catches the error and re-throws it. This ensures that any errors are propagated to the caller of the `createTask` function.
  
+### TaskAssignment-subsystem
+
+This Subsystem contains API for task assignment, The base URL for all the endpoints in this subsystem is `/TaskAssignment/`, the details of the endPoints in this are:
+
+### 1. `Assign-task/:categoryId`
+
+- Method: POST
+- Description: This API is used to create new task one at a time.
+- Parameters:
+  - `categoryId` (string, required): valid values are among the following: Work,Personal,Health,Finance,Education,Errands,Home,Social,Fitness,Hobbies,Travel,Projects,Family,Shopping,Goal.
+  - `title` (string, required): Title of the task.
+  - `taskId` (string, required): unique identifier of the task.
+  - `userName` (string, required): username of the going to be assignee.
+  - Responses:
+    - `200`: Task assigned successfully.
+    - `400`: Bad request.
+    - `404`: Task Not found.
+    - `409`: Task already been assigned to the user
+    - `503`: assignTask process failed. Internal error in the process layer.
+  - sample Request:
+    ```
+      http://localhost:3000/routes/Task-Management-system/SubSystem/TaskAssignment/Assign-task/Work
+
+      {
+        "taskId": "ea39fe9b-8c1f-4b1b-8072-f93474850101",
+        "userName": "Anirudh.Nayak2314",
+        "title": "Finish project"
+      }
+    ```
+  - ProcessLogic:
+
+          1. The `assignTask` function is an asynchronous arrow function that takes an object as its parameter with properties `userName`, `categoryId`, `taskId`, and `title`. These properties represent the details of the task assignment.
+
+          2. Inside the function, a check is performed to see if the task exists in the Redis database by constructing the task key using `taskId` and `title`. The `redisClient.exists` method is used to check for the existence of the task.
+
+          3. If the task does not exist (i.e., `taskExists` is `false`), the function throws an error object with a status code of `404`, indicating "Not Found," along with an error message stating that the task was not found.
+
+          4. The function then proceeds to check if the task is already assigned to the user. This is done by using the `redisClient.sIsMember` method to check if the task ID (`taskId`) is already a member of the user's set of assigned tasks (`user:${userName}:tasks`).
+
+          5. If the task is already assigned to the user (i.e., `isTaskAlreadyPresent` is `true`), the function throws an error object with a status code of `409`, indicating a "Conflict," and an error message stating that the task has already been assigned to the user.
+
+          6. If the task is not already assigned to the user, the function updates the task details in Redis to indicate that the task is now assigned. It uses the `redisClient.hSet` method to set the `isAssigned` field to `1`, indicating that the task is assigned, and the `assignTo` field to the `userName` of the user the task is assigned to.
+
+          7. Additionally, the function adds the `taskId` to the user's set of assigned tasks (`user:${userName}:tasks`) using the `redisClient.sAdd` method.
+
+          8. If all operations are successful, the function returns a success message indicating that the task has been successfully assigned to the user.
+
+          9. If any errors occur during the execution of the code (e.g., Redis connection issues or other exceptions), the `catch` block catches the error and re-throws it. This ensures that any errors are propagated to the caller of the `assignTask` function.
+
+
 
 ## Features
 
