@@ -30,7 +30,7 @@ function expressRateLimiterMiddleware({
 
 module.exports.registerUserMiddlewares = {
   expressRateLimiterMiddleware: expressRateLimiterMiddleware({
-    endpoint: 'myEndPoint',
+    endpoint: 'register-user',
     windowDurationInMinutes: 0.5, // 30 seconds
     requestLimit: 2, // Limit each IP to 2 requests per 30 seconds
     statusCode: 429, // HTTP status code for rate limit exceeded
@@ -40,7 +40,7 @@ module.exports.registerUserMiddlewares = {
 
 module.exports.loginUserMiddlewares = {
   expressRateLimiterMiddleware: expressRateLimiterMiddleware({
-    endpoint: 'myEndPoint',
+    endpoint: 'login-user',
     windowDurationInMinutes: 0.5, // 30 seconds
     requestLimit: 2, // Limit each IP to 2 requests per 30 seconds
     statusCode: 429, // HTTP status code for rate limit exceeded
@@ -87,7 +87,7 @@ module.exports.listTaskMiddlewares = {
 
 module.exports.listUsersMiddlewares = {
   expressRateLimiterMiddleware: expressRateLimiterMiddleware({
-    endpoint: 'list/tasks',
+    endpoint: 'list/users',
     windowDurationInMinutes: 0.5, // 30 seconds
     requestLimit: 2, // Limit each IP to 2 requests per 30 seconds
     statusCode: 429, // HTTP status code for rate limit exceeded
@@ -98,7 +98,7 @@ module.exports.listUsersMiddlewares = {
 
 module.exports.taskDetailsMiddlewares = {
   expressRateLimiterMiddleware: expressRateLimiterMiddleware({
-    endpoint: 'list/tasks',
+    endpoint: 'task/details',
     windowDurationInMinutes: 0.5, // 30 seconds
     requestLimit: 2, // Limit each IP to 2 requests per 30 seconds
     statusCode: 429, // HTTP status code for rate limit exceeded
@@ -109,7 +109,19 @@ module.exports.taskDetailsMiddlewares = {
 
 module.exports.createTaskMiddlewares = {
   expressRateLimiterMiddleware: expressRateLimiterMiddleware({
-    endpoint: 'list/tasks',
+    endpoint: 'create-task/:categoryId',
+    windowDurationInMinutes: 0.5, // 30 seconds
+    requestLimit: 2, // Limit each IP to 2 requests per 30 seconds
+    statusCode: 429, // HTTP status code for rate limit exceeded
+    ErrorMessage: 'Too many requests from your IP. Please try again later.',
+  }),
+};
+
+
+
+module.exports.assignTaskMiddlewares = {
+  expressRateLimiterMiddleware: expressRateLimiterMiddleware({
+    endpoint: 'Assign-task/:categoryId',
     windowDurationInMinutes: 0.5, // 30 seconds
     requestLimit: 2, // Limit each IP to 2 requests per 30 seconds
     statusCode: 429, // HTTP status code for rate limit exceeded
