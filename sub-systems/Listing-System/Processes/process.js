@@ -3,6 +3,31 @@ require('dotenv').config();
 const redisClient = require('../../../shared/src/configurations/redis.configurations.js');
 
 module.exports.listingProcesses = {
+  getTaskDetails: async ({ taskId, title }) => {
+    try {
+      // Check if the task exists in Redis by constructing the key using taskId and title
+      const doesTaskExist = await redisClient.exists(`task:${title}:${taskId}`);
+  
+      // If the task exists (Redis returned 1), proceed to fetch the task details
+      if (doesTaskExist === 1) {
+        // Fetch all the fields and values of the Redis hash identified by the constructed key
+        const taskDetails = await redisClient.hGetAll(`task:${title}:${taskId}`);
+  
+        // Return an object containing the task details
+        return {
+          message: taskDetails,
+        };
+      } else {
+        // If the task does not exist in Redis, throw an error with status code 404
+        // indicating "Not Found" and a descriptive error message
+        throw { status: 404, message: 'Bad Request', error: 'Task not found' };
+      }
+    } catch (error) {
+      // Catch any errors that occur during the execution of the code and re-throw them
+      // This ensures that any errors are propagated to the caller of the function
+      throw error;
+    }
+  },
     listUsers: async ({ userType }) => {
         try {
           // Initialize an empty array to store all user names
