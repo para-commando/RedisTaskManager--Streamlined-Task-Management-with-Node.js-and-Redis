@@ -1,6 +1,6 @@
 const app = require('../app');
 const {
-  registerUserMiddlewares, loginUserMiddlewares, sendOtpMiddlewares, verifyOtpMiddlewares, resetPasswordMiddlewares, listTaskMiddlewares, listUsersMiddlewares
+  registerUserMiddlewares, loginUserMiddlewares, sendOtpMiddlewares, verifyOtpMiddlewares, resetPasswordMiddlewares, listTaskMiddlewares, listUsersMiddlewares, taskDetailsMiddlewares
 } = require('../Middlewares/Route-Middlewares/expressRateLimit.middleware');
 const Joi = require('joi');
 const {
@@ -12,6 +12,49 @@ const {
 const logger = require('../../../shared/src/configurations/logger.configurations');
 
 // * * Listing/Details subsystem APIs ///////////////////////////////////
+
+app.get(
+  '/routes/Task-Management-system/SubSystem/Listing/task/details',
+  taskDetailsMiddlewares.expressRateLimiterMiddleware,
+  async (req, res, next) => {
+    try {
+      const schema = Joi.object({
+        taskId: Joi.string()
+          .pattern(
+            new RegExp(
+              '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$'
+            )
+          )
+          .required(),
+        title: Joi.string().trim().max(255).required(),
+      });
+      const validatedData = schema.validate({
+        taskId: req.query.taskId,
+        title: req.query.title,
+      });
+      if (validatedData?.error) {
+        throw {
+          status: 400,
+          message: 'Bad Request',
+          error: validatedData?.error,
+        };
+      } else {
+        const { taskId, title } = validatedData.value;
+         const response = await listingProcesses.getTaskDetails({
+          taskId: taskId,
+          title: title,
+        });
+        logger.info('🚀response: ', response);
+        res.status(200).json({
+          responseData: response,
+        });
+      }
+     } catch (error) {
+      logger.error('This is an error message.');
+      res.status(400).json({ error: error });
+    }
+  }
+);
 
 app.get(
   '/routes/Task-Management-system/SubSystem/Listing/list/tasks',
