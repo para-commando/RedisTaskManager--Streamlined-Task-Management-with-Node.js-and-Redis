@@ -1,6 +1,6 @@
 const app = require('../app');
 const {
-  registerUserMiddlewares, loginUserMiddlewares, sendOtpMiddlewares, verifyOtpMiddlewares, resetPasswordMiddlewares, listTaskMiddlewares, listUsersMiddlewares, taskDetailsMiddlewares
+  registerUserMiddlewares, loginUserMiddlewares, sendOtpMiddlewares, verifyOtpMiddlewares, resetPasswordMiddlewares, listTaskMiddlewares, listUsersMiddlewares, taskDetailsMiddlewares, createTaskMiddlewares
 } = require('../Middlewares/Route-Middlewares/expressRateLimit.middleware');
 const Joi = require('joi');
 const {
@@ -9,7 +9,93 @@ const {
 const {
   authenticationProcesses,
 } = require('../../../sub-systems/Authentication-System/Processes/process');
+const {
+  taskCreationProcesses,
+} = require('../../../sub-systems/TaskCreation-System/Processes/process');
 const logger = require('../../../shared/src/configurations/logger.configurations');
+
+// * * Create Task subsystem APIs ///////////////////////////////////
+
+app.post(
+  '/routes/Task-Management-system/SubSystem/TaskCreation/create-task/:categoryId',
+  createTaskMiddlewares.expressRateLimiterMiddleware,
+  async (req, res, next) => {
+    try {
+      const schema = Joi.object({
+        title: Joi.string().trim().max(255).required(),
+        description: Joi.string().trim().required(),
+        dueDate: Joi.string().isoDate().required(),
+        priority: Joi.string()
+          .valid('Highest', 'High', 'Medium', 'Low')
+          .required(),
+        status: Joi.string()
+          .valid('Not Started', 'In Progress', 'Completed', 'Unassigned')
+          .required(),
+        categoryId: Joi.string()
+          .valid(
+            'Work',
+            'Personal',
+            'Health',
+            'Finance',
+            'Education',
+            'Errands',
+            'Home',
+            'Social',
+            'Fitness',
+            'Hobbies',
+            'Travel',
+            'Projects',
+            'Family',
+            'Shopping',
+            'Goals'
+          )
+          .required(),
+        isAssigned: Joi.string().valid('0').required(),
+        assignTo: Joi.string().min(3).max(30).required(),
+      });
+      // used path parameter
+      req.body.categoryId = req.params.categoryId;
+      const validatedData = schema.validate(req.body);
+      if (validatedData?.error) {
+        throw {
+          status: 400,
+          message: 'Bad Request',
+          error: validatedData?.error,
+        };
+      } else {
+        const {
+          title,
+          description,
+          dueDate,
+          priority,
+          status,
+          categoryId,
+          isAssigned,
+          assignTo,
+        } = validatedData.value;
+        const response = await taskCreationProcesses.createTask({
+          title: title,
+          description: description,
+          dueDate: dueDate,
+          priority: priority,
+          status: status,
+          categoryId: categoryId,
+          isAssigned: isAssigned,
+          assignTo: assignTo,
+        });
+        logger.info('🚀response: ', response);
+        res.status(200).json({
+          responseData: response,
+        });
+      }
+    } catch (error) {
+      logger.error('This is an error message.');
+      res.status(400).json({ error: error });
+    }
+  }
+);
+
+
 
 // * * Listing/Details subsystem APIs ///////////////////////////////////
 
