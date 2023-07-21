@@ -1,6 +1,6 @@
 const app = require('../app');
 const {
-  registerUserMiddlewares, loginUserMiddlewares, sendOtpMiddlewares, verifyOtpMiddlewares, resetPasswordMiddlewares, listTaskMiddlewares, listUsersMiddlewares, taskDetailsMiddlewares, createTaskMiddlewares
+  registerUserMiddlewares, loginUserMiddlewares, sendOtpMiddlewares, verifyOtpMiddlewares, resetPasswordMiddlewares, listTaskMiddlewares, listUsersMiddlewares, taskDetailsMiddlewares, createTaskMiddlewares, assignTaskMiddlewares
 } = require('../Middlewares/Route-Middlewares/expressRateLimit.middleware');
 const Joi = require('joi');
 const {
@@ -12,7 +12,77 @@ const {
 const {
   taskCreationProcesses,
 } = require('../../../sub-systems/TaskCreation-System/Processes/process');
+const {
+  taskAssignmentProcesses,
+} = require('../../../sub-systems/TaskAssignment-System/Processes/process');
 const logger = require('../../../shared/src/configurations/logger.configurations');
+
+// * * Assign Task subsystem APIs ///////////////////////////////////
+
+app.post(
+  '/routes/Task-Management-system/SubSystem/TaskAssignment/Assign-task/:categoryId',
+  assignTaskMiddlewares.expressRateLimiterMiddleware,
+  async (req, res, next) => {
+    try {
+      const schema = Joi.object({
+        userName: Joi.string().trim().max(255).required(),
+  
+        categoryId: Joi.string()
+          .valid(
+            'Work',
+            'Personal',
+            'Health',
+            'Finance',
+            'Education',
+            'Errands',
+            'Home',
+            'Social',
+            'Fitness',
+            'Hobbies',
+            'Travel',
+            'Projects',
+            'Family',
+            'Shopping',
+            'Goals'
+          )
+          .required(),
+        taskId: Joi.string()
+          .pattern(
+            new RegExp(
+              '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$'
+            )
+          )
+          .required(),
+        title: Joi.string().trim().max(255).required(),
+      });
+      req.body.categoryId = req.params.categoryId;
+      const validatedData = schema.validate(req.body);
+      if (validatedData?.error) {
+        throw {
+          status: 400,
+          message: 'Bad Request',
+          error: validatedData?.error,
+        };
+      } else {
+        const { userName, categoryId, taskId, title } = validatedData.value;
+        const response = await taskAssignmentProcesses.assignTask({
+          userName: userName,
+          categoryId: categoryId,
+          taskId: taskId,
+          title: title,
+        });
+        logger.info('🚀response: ', response);
+        res.status(200).json({
+          responseData: response,
+        });
+      }
+    } catch (error) {
+      logger.error('This is an error message.');
+      res.status(400).json({ error: error });
+    }
+  }
+);
+
 
 // * * Create Task subsystem APIs ///////////////////////////////////
 
