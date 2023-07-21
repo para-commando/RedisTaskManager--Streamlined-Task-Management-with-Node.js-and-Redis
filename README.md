@@ -249,7 +249,7 @@ This Subsystem contains APIs for user authentication including OTP validated use
 
 ### Listing-subsystem
 
-This Subsystem contains APIs for user authentication including OTP validated userName and Password recovery option, The base URL for all the endpoints in this subsystem is `/Listing/`, the details of the endPoints in this are:
+This Subsystem contains APIs for listing be it users/task, task details. The base URL for all the endpoints in this subsystem is `/Listing/`, the details of the endPoints in this are:
 
 ### 1. `/list/tasks`
 
@@ -364,9 +364,64 @@ This Subsystem contains APIs for user authentication including OTP validated use
         9. If the task does not exist (i.e., `doesTaskExist` is not equal to `1`), the function throws an error object with a status code of `404`, a message of `'Bad Request'`, and an additional error message of `'Task not found'`.
 
         10. Any errors that occur during the execution of the code are caught in the `catch` block. The caught error is then re-thrown to propagate it to the caller of the `getTaskDetails` function.
+ 
 
-        11. It's important to note that this code assumes the presence of a valid Redis client (`redisClient`) and its correct configuration to connect to the Redis database. The actual implementation of the Redis client and database connection is not provided in this code snippet.
+### TaskCreation-subsystem
 
+This Subsystem contains API for task creation, The base URL for all the endpoints in this subsystem is `/TaskCreation/`, the details of the endPoints in this are:
+
+### 1. `create-task/:categoryId`
+
+- Method: POST
+- Description: This API is used to create new task one at a time.
+- Parameters:
+  - `categoryId` (string, required): valid values are among the following: Work,Personal,Health,Finance,Education,Errands,Home,Social,Fitness,Hobbies,Travel,Projects,Family,Shopping,Goal.
+  - `title` (string, required): Title of the task.
+  - `dueDate` (string, required): tentative due date of the task in iso string format.
+  - `priority` (string, required): valid values are Highest, High, Medium, Low.
+  - `status` (string, required): valid values are Not Started, In Progress, Completed, UnAssigned, Scheduled.
+  - `isAssigned` (string, required): valid value is '0' if assignTo is not equal to none then this value will   be changed internally in code.
+  - `assignTo` (string, required): none can be passed if no assignee else user name must be passed.
+- Responses:
+  - `200`: Task created successfully.
+  - `400`: Bad request.
+  - `503`: createTask process failed. Internal error in the process layer.
+- sample Request:
+  ```
+    http://localhost:3000/routes/Task-Management-system/SubSystem/TaskCreation/create-task/Work
+
+    {
+      "title": "Finish project",
+      "description": "Complete the coding part of the project",
+      "dueDate": "2023-05-30T10:00:00Z",
+      "priority": "High",
+      "status": "Not Started",
+      "isAssigned": "0",
+      "assignTo": "Anirudh.Nayak2314"
+    }
+  ```
+- ProcessLogic:
+
+        1. The `createTask` function is an asynchronous arrow function that takes several parameters representing different properties of the task, such as `title`, `description`, `dueDate`, `priority`, `status`, `categoryId`, `isAssigned`, and `assignTo`.
+
+        2. Inside the function, a unique `taskId` is generated using the `uuidv4()` function from the `uuid` library, which provides a Universally Unique Identifier (UUID).
+
+        3. The function checks if the task should be assigned to someone by comparing the `assignTo` parameter with the string `'none'`. If `assignTo` is not `'none'`, the `isAssigned` variable is set to `1`, indicating that the task is assigned.
+
+        4. An array named `taskDetails` is created to hold various task fields and their corresponding values as objects.
+
+        5. The `taskDetails` array is populated with objects representing each field of the task, along with its corresponding value. This allows for easy iteration and storage in Redis later on.
+
+        6. The function proceeds to store the task details in a Redis hash. It iterates through each `taskData` object in the `taskDetails` array and uses the `redisClient.hSet` method to set the field and value in the Redis hash. The Redis key for each task is constructed as `task:${title}:${taskId}`.
+
+        7. After storing the task details in Redis, the function assigns the task to the specified category by adding the task key (`task:${title}:${taskId}`) to the category's set in Redis. The category set is represented by the key `category:${categoryId}:tasks`.
+
+        8. Additionally, the function adds the task key to the "All:Tasks" set in Redis to keep track of all tasks across categories.
+
+        9. If all operations are successful, the function returns a success message containing the `taskId` and `categoryId` to indicate that the task was created successfully.
+
+        10. If any errors occur during the execution of the code (e.g., Redis connection issues or other exceptions), the `catch` block catches the error and re-throws it. This ensures that any errors are propagated to the caller of the `createTask` function.
+ 
 
 ## Features
 
