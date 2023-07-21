@@ -261,7 +261,10 @@ This Subsystem contains APIs for user authentication including OTP validated use
   - `200`: Tasks listed successfully.
   - `400`: Bad request.
   - `503`: listTasks process failed. Internal error in the process layer.
-
+- sample Request:
+  ```
+    http://localhost:3000/routes/Task-Management-system/SubSystem/Listing/list/tasks
+  ```
 - ProcessLogic:
 
         1. Fetch all categories containing tasks from the Redis database. 
@@ -281,6 +284,88 @@ This Subsystem contains APIs for user authentication including OTP validated use
         8. Return an object with a `message` key containing the final result (`taskIdMappedToCategories`).
 
         9. Handle any errors that occur during the process and throw them for further handling in the calling code.
+
+### 2. `/list/users`
+
+- Method: GET
+- Description: This API is used to either return all users or those users who have not been assigned any task, based on input filter condition namely 'usersWithNoTasks'
+- Parameters:
+  - `userType` (string, optional): valid value is 'usersWithNoTasks'.
+- Responses:
+  - `200`: users listed successfully.
+  - `400`: Bad request.
+  - `503`: listUsers process failed. Internal error in the process layer.
+- sample Request:
+  ```
+  http://localhost:3000/routes/Task-Management-system/SubSystem/Listing/list/users
+  
+  http://localhost:3000/routes/Task-Management-system/SubSystem/Listing/list/users?userType=usersWithNoTasks
+  ```
+- ProcessLogic:
+
+        1. The function `listUsers` is defined as an asynchronous function that takes an object with a property `userType` as its parameter.
+
+        2. An empty array `allUserNames` is initialized to store all user names.
+
+        3. The function checks if a specific `userType` is provided. If `userType` is truthy (not `null`, `undefined`, `false`, etc.), it executes the code block under the `if` statement. Otherwise, it executes the code block under the `else` statement.
+
+        4. If a specific `userType` is provided, the function fetches all user names from Redis using `redisClient.sMembers('All:Users')` and stores them in the `allUserNames` array.
+
+        5. The function uses a Lua script to find unique user names associated with tasks in Redis. The Lua script iterates over keys in the format 'task:*' and retrieves the 'assignTo' field from each hash. It stores unique user names in the `matchingHashes` array.
+
+        6. The Lua script returns the `matchingHashes` array containing the unique user names associated with tasks.
+
+        7. The function executes the Lua script in Redis using `redisClient.eval(luaScript, 0)`, passing the Lua script and the number of keys to be passed to the script (0 in this case).
+
+        8. The result of the Lua script execution is stored in the `result` variable.
+
+        9. The function filters out user names that are associated with tasks from the fetched user names using the `filter` method and the `includes` method on arrays.
+
+        10. If no `userType` is provided, the function simply fetches all user names from Redis using `redisClient.sMembers('All:Users')`.
+
+        11. The final list of user names is returned as the result of the function in the format `{ message: allUserNames }`.
+
+        12. If there's an error during the execution of the function (in the `try` block), it will be caught in the `catch` block, and the error will be thrown for handling in the calling code.
+
+### 2. `/task/details`
+
+- Method: GET
+- Description: This API is used to get details about a task
+- Parameters:
+  - `taskId` (string, required): unique identifier for the task.
+  - `title` (string, required): The user's username.
+- Responses:
+  - `200`: Task details fetched successfully.
+  - `400`: Bad request.
+  - `404`: Task not found.
+  - `503`: getTaskDetails process failed. Internal error in the process layer.
+- sample Request:
+  ```
+  http://localhost:3000/routes/Task-Management-system/SubSystem/Listing/task/details?taskId=ea39fe9b-8c1f-4b1b-8072-f93474850101&title=Finish project
+  ```
+- ProcessLogic:
+        
+        1. The function `getTaskDetails` is defined as an asynchronous arrow function, taking an object with `taskId` and `title` as its parameters.
+
+        2. Inside the function, a Redis client (`redisClient`) is used to interact with the Redis database.
+
+        3. The function starts by attempting to check if a task exists in the Redis database using the `redisClient.exists` method. The key for checking existence is constructed using the `taskId` and `title` parameters as `task:${title}:${taskId}`.
+
+        4. The `await` keyword is used to wait for the result of the `redisClient.exists` method, as it returns a Promise. The result is stored in the `doesTaskExist` variable.
+
+        5. An `if` statement is used to check if the `doesTaskExist` variable is equal to `1`, which means the task exists in the database.
+
+        6. If the task exists, the function proceeds to fetch the details of the task using the `redisClient.hGetAll` method. This method retrieves all the fields and values of a Redis hash identified by the key `task:${title}:${taskId}`.
+
+        7. The `await` keyword is used again to wait for the result of the `redisClient.hGetAll` method. The retrieved task details are stored in the `taskDetails` variable.
+
+        8. Finally, if the task exists, the function returns an object with a `message` property containing the `taskDetails`.
+
+        9. If the task does not exist (i.e., `doesTaskExist` is not equal to `1`), the function throws an error object with a status code of `404`, a message of `'Bad Request'`, and an additional error message of `'Task not found'`.
+
+        10. Any errors that occur during the execution of the code are caught in the `catch` block. The caught error is then re-thrown to propagate it to the caller of the `getTaskDetails` function.
+
+        11. It's important to note that this code assumes the presence of a valid Redis client (`redisClient`) and its correct configuration to connect to the Redis database. The actual implementation of the Redis client and database connection is not provided in this code snippet.
 
 
 ## Features
