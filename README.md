@@ -261,7 +261,10 @@ This Subsystem contains APIs for user authentication including OTP validated use
   - `200`: Tasks listed successfully.
   - `400`: Bad request.
   - `503`: listTasks process failed. Internal error in the process layer.
-
+- sample Request:
+  ```
+    http://localhost:3000/routes/Task-Management-system/SubSystem/Listing/list/tasks
+  ```
 - ProcessLogic:
 
         1. Fetch all categories containing tasks from the Redis database. 
@@ -281,6 +284,46 @@ This Subsystem contains APIs for user authentication including OTP validated use
         8. Return an object with a `message` key containing the final result (`taskIdMappedToCategories`).
 
         9. Handle any errors that occur during the process and throw them for further handling in the calling code.
+
+### 2. `/list/users`
+
+- Method: GET
+- Description: This API is used to either return all users or those users who have not been assigned any task, based on input filter condition namely 'usersWithNoTasks'
+- Parameters:
+   None.
+- Responses:
+  - `200`: users listed successfully.
+  - `400`: Bad request.
+  - `503`: listUsers process failed. Internal error in the process layer.
+- sample Request:
+  ```
+  http://localhost:3000/routes/Task-Management-system/SubSystem/Listing/list/users
+  ```
+- ProcessLogic:
+
+        1. The function `listUsers` is defined as an asynchronous function that takes an object with a property `userType` as its parameter.
+
+        2. An empty array `allUserNames` is initialized to store all user names.
+
+        3. The function checks if a specific `userType` is provided. If `userType` is truthy (not `null`, `undefined`, `false`, etc.), it executes the code block under the `if` statement. Otherwise, it executes the code block under the `else` statement.
+
+        4. If a specific `userType` is provided, the function fetches all user names from Redis using `redisClient.sMembers('All:Users')` and stores them in the `allUserNames` array.
+
+        5. The function uses a Lua script to find unique user names associated with tasks in Redis. The Lua script iterates over keys in the format 'task:*' and retrieves the 'assignTo' field from each hash. It stores unique user names in the `matchingHashes` array.
+
+        6. The Lua script returns the `matchingHashes` array containing the unique user names associated with tasks.
+
+        7. The function executes the Lua script in Redis using `redisClient.eval(luaScript, 0)`, passing the Lua script and the number of keys to be passed to the script (0 in this case).
+
+        8. The result of the Lua script execution is stored in the `result` variable.
+
+        9. The function filters out user names that are associated with tasks from the fetched user names using the `filter` method and the `includes` method on arrays.
+
+        10. If no `userType` is provided, the function simply fetches all user names from Redis using `redisClient.sMembers('All:Users')`.
+
+        11. The final list of user names is returned as the result of the function in the format `{ message: allUserNames }`.
+
+        12. If there's an error during the execution of the function (in the `try` block), it will be caught in the `catch` block, and the error will be thrown for handling in the calling code.
 
 
 ## Features
