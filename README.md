@@ -18,6 +18,8 @@ The system is designed to be scalable and secure. It uses a microservices archit
 
 The system is easy to use. The API documentation is clear and concise, and the system provides a user-friendly interface.
 
+![Example Image](./shared/src/assets/introImage.jpg)
+
 ### Features
 
 - Create, assign, and track tasks
