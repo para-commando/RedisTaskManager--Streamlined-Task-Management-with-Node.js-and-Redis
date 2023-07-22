@@ -27,7 +27,7 @@ const logger = require('../../../shared/src/configurations/logger.configurations
 // * * Search Task subsystem APIs ///////////////////////////////////
 
 app.get(
-  '/routes/userAuthentication/filter-task',
+  '/routes/Task-Management-system/SubSystem/SearchTask/filter-task',
   filterTaskMiddlewares.expressRateLimiterMiddleware,
   async (req, res, next) => {
     try {
