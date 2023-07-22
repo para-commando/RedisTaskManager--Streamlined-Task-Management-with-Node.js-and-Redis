@@ -475,7 +475,7 @@ This Subsystem contains API for task assignment, The base URL for all the endpoi
 
 ### TaskUpdating-subsystem
 
-This Subsystem contains API for task assignment, The base URL for all the endpoints in this subsystem is `/Updating/`, the details of the endPoints in this are:
+This Subsystem contains API for task updation, The base URL for all the endpoints in this subsystem is `/Updating/`, the details of the endPoints in this are:
 
 ### 1. `/update-task`
 
@@ -533,6 +533,38 @@ This Subsystem contains API for task assignment, The base URL for all the endpoi
 
         9. If any error occurs during the update process, the function throws the error, propagating it further up the call stack for handling.
 
+### SearchTask-subsystem
+
+This Subsystem contains API for searching Task, The base URL for all the endpoints in this subsystem is `/SearchTask/`, the details of the endPoints in this are:
+
+### 1. `/search-task`
+
+- Method: GET
+- Description: This API is used to search for tasks based on its title keywords.
+- Parameters:
+  - `searchKeyword` (string, required): keyword from the title of the task to be searched.
+ 
+- Responses:
+  - `200`: Task search was successful
+  - `400`: Bad request.
+  - `503`: searchTaskByKeywords process failed. Internal error in the process layer.
+- sample Request:
+  ```
+    http://localhost:3000/routes/Task-Management-system/SubSystem/SearchTask/search-task?searchKeyword=Fin
+  ```
+- ProcessLogic:
+
+        1. The `searchTaskByKeywords` function is an asynchronous function that searches for tasks in Redis based on the provided `searchKeyword`.
+
+        2. It creates a pattern to match Redis keys based on the `searchKeyword`. The pattern is formed by concatenating the string `'task:'`, the `searchKeyword`, and the wildcard `*`. For example, if the `searchKeyword` is `'example'`, the pattern would be `'task:example*'`.
+
+        3. The function uses the Redis `keys` command to fetch all keys that match the specified pattern.
+
+        4. The function returns the list of matching keys as the search result wrapped inside an object with a property `message`.
+
+        5. If any error occurs during the search process, the function throws the error, propagating it further up the call stack for handling.
+
+ 
 
 ## Features
 
