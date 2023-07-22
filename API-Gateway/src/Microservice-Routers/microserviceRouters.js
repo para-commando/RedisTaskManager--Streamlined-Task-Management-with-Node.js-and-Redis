@@ -1,6 +1,6 @@
 const app = require('../app');
 const {
-  registerUserMiddlewares, loginUserMiddlewares, sendOtpMiddlewares, verifyOtpMiddlewares, resetPasswordMiddlewares, listTaskMiddlewares, listUsersMiddlewares, taskDetailsMiddlewares, createTaskMiddlewares, assignTaskMiddlewares, updateTaskMiddlewares, searchTaskMiddlewares
+  registerUserMiddlewares, loginUserMiddlewares, sendOtpMiddlewares, verifyOtpMiddlewares, resetPasswordMiddlewares, listTaskMiddlewares, listUsersMiddlewares, taskDetailsMiddlewares, createTaskMiddlewares, assignTaskMiddlewares, updateTaskMiddlewares
 } = require('../Middlewares/Route-Middlewares/expressRateLimit.middleware');
 const Joi = require('joi');
 const {
@@ -18,49 +18,7 @@ const {
 const {
   taskUpdatingProcesses,
 } = require('../../../sub-systems/TaskUpdating-System/Processes/process');
-
-const {
-  searchTaskProcesses,
-} = require('../../../sub-systems/SearchTask-System/Processes/process');
-
 const logger = require('../../../shared/src/configurations/logger.configurations');
-
-// * * Search Task subsystem APIs ///////////////////////////////////
-
-app.get(
-  '/routes/Task-Management-system/SubSystem/SearchTask/search-task',
-  searchTaskMiddlewares.expressRateLimiterMiddleware,
-  async (req, res, next) => {
-    try {
-      const schema = Joi.object({
-        searchKeyword: Joi.string().trim().max(255).required(),
-      });
-      const validatedData = schema.validate({
-        searchKeyword: req.query.searchKeyword,
-      });
-      if (validatedData?.error) {
-        throw {
-          status: 400,
-          message: 'Bad Request',
-          error: validatedData?.error,
-        };
-      } else {
-        const { searchKeyword } = validatedData.value;
-        const response = await searchTaskProcesses.searchTaskByKeywords({
-          searchKeyword: searchKeyword,
-        });
-        logger.info('🚀response: ', response);
-        res.status(200).json({
-          responseData: response,
-        });
-      }
-    } catch (error) {
-      logger.error('This is an error message.');
-      res.status(400).json({ error: error });
-    }
-  }
-);
-
 
 // * * Task Updating subsystem APIs ///////////////////////////////////
 
