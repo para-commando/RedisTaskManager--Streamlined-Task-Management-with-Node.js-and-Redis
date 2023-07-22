@@ -376,6 +376,7 @@ This Subsystem contains API for task creation, The base URL for all the endpoint
 - Description: This API is used to create new task one at a time.
 - Parameters:
   - `categoryId` (string, required): valid values are among the following: Work,Personal,Health,Finance,Education,Errands,Home,Social,Fitness,Hobbies,Travel,Projects,Family,Shopping,Goal.
+  - `description` (string, required): description of the task.
   - `title` (string, required): Title of the task.
   - `dueDate` (string, required): tentative due date of the task in iso string format.
   - `priority` (string, required): valid values are Highest, High, Medium, Low.
@@ -471,6 +472,66 @@ This Subsystem contains API for task assignment, The base URL for all the endpoi
 
           9. If any errors occur during the execution of the code (e.g., Redis connection issues or other exceptions), the `catch` block catches the error and re-throws it. This ensures that any errors are propagated to the caller of the `assignTask` function.
 
+
+### TaskUpdating-subsystem
+
+This Subsystem contains API for task assignment, The base URL for all the endpoints in this subsystem is `/Updating/`, the details of the endPoints in this are:
+
+### 1. `/update-task`
+
+- Method: PUT
+- Description: This API is used to update details of a task.
+- Parameters:
+  - `title` (string, required): Title of the task.
+  - `categoryId` (string, required): valid values are among the following: Work,Personal,Health,Finance,Education,Errands,Home,Social,Fitness,Hobbies,Travel,Projects,Family,Shopping,Goal.
+  - `taskID` (string, required): unique identifier for the task.
+  - `dueDate` (string, required): tentative due date of the task in iso string format.
+  - `description` (string, required): description of the task.
+  - `priority` (string, required): valid values are Highest, High, Medium, Low.
+  - `status` (string, required): valid values are Not Started, In Progress, Completed, UnAssigned, Scheduled.
+  - `isAssigned` (string, required): valid value is '0' if assignTo is not equal to none then this value will   be changed internally in code.
+  - `assignTo` (string, required): none can be passed if no assignee else user name must be passed.
+- Responses:
+  - `200`: Task assigned successfully.
+  - `400`: Bad request.
+  - `404`: Task Not found.
+  - `409`: Task already been assigned to the user
+  - `503`: assignTask process failed. Internal error in the process layer.
+- sample Request:
+  ```
+    http://localhost:3000/routes/Task-Management-system/SubSystem/Updating/update-task
+
+    {
+      "taskId": "ea39fe9b-8c1f-4b1b-8072-f93474850101",
+      "categoryId": "Work",
+      "title": "Finish project",
+      "description": "Complete the coding part of the project",
+      "dueDate": "2023-05-30T10:00:00Z",
+      "priority": "High",
+      "status": "Not Started",
+      "isAssigned": "0",
+      "assignTo": "Anirudh.Nayak2314"
+    }
+  ```
+- ProcessLogic:
+
+        1. The `updateTask` function is an asynchronous function that updates the details of a task in a Redis database.
+
+        2. It checks if the `assignTo` parameter is set to `'none'`. If so, it sets the `isAssigned` flag to `0`, indicating that the task is not assigned to anyone. Otherwise, it sets the flag to `1`, indicating the task is assigned.
+
+        3. The function creates an array called `taskDetails`, containing key-value pairs representing the fields and their corresponding updated values to be stored in the Redis hash.
+
+        4. It checks if the task with the given `title` and `taskId` exists in the Redis database using the key format: `task:${title}:${taskId}`.
+
+        5.  If the task exists, it fetches the current details of the task from Redis and proceeds to update each field with the new values provided in the `taskDetails` array.
+
+        6. If the `categoryId` of the task has changed during the update, it updates the category associations accordingly. It removes the task from the previous category's set, removes the category from the 'All:Tasks' set, adds the task to the new category's set, and adds the category to the 'All:Tasks' set.
+
+        7. After successfully updating the task details in Redis, the function returns a success message: `'Task updated successfully'`.
+
+        8. If the task does not exist in the database, the function throws an error with a status code of `404`, a message of `'Bad Request'`, and an additional error message indicating `'Task not found'`.
+
+        9. If any error occurs during the update process, the function throws the error, propagating it further up the call stack for handling.
 
 
 ## Features
