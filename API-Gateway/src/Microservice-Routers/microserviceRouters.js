@@ -1,6 +1,6 @@
 const app = require('../app');
 const {
-  registerUserMiddlewares, loginUserMiddlewares, sendOtpMiddlewares, verifyOtpMiddlewares, resetPasswordMiddlewares, listTaskMiddlewares, listUsersMiddlewares, taskDetailsMiddlewares, createTaskMiddlewares, assignTaskMiddlewares, updateTaskMiddlewares, searchTaskMiddlewares
+  registerUserMiddlewares, loginUserMiddlewares, sendOtpMiddlewares, verifyOtpMiddlewares, resetPasswordMiddlewares, listTaskMiddlewares, listUsersMiddlewares, taskDetailsMiddlewares, createTaskMiddlewares, assignTaskMiddlewares, updateTaskMiddlewares, searchTaskMiddlewares, filterTaskMiddlewares
 } = require('../Middlewares/Route-Middlewares/expressRateLimit.middleware');
 const Joi = require('joi');
 const {
@@ -18,10 +18,86 @@ const {
 const {
   taskUpdatingProcesses,
 } = require('../../../sub-systems/TaskUpdating-System/Processes/process');
+const {
+  searchTaskProcesses,
+} = require('../../../sub-systems/SearchTask-System/Processes/process');
 const logger = require('../../../shared/src/configurations/logger.configurations');
 
 
 // * * Search Task subsystem APIs ///////////////////////////////////
+
+app.get(
+  '/routes/userAuthentication/filter-task',
+  filterTaskMiddlewares.expressRateLimiterMiddleware,
+  async (req, res, next) => {
+    try {
+      const schema = Joi.object({
+        sort: Joi.string().valid('priority', 'dueDate').default(null),
+        priority: Joi.string()
+          .valid('Highest', 'High', 'Medium', 'Low')
+          .default(null),
+        status: Joi.string()
+          .valid('Not Started', 'In Progress', 'Completed', 'Unassigned')
+          .default(null),
+        categoryId: Joi.string()
+          .valid(
+            'Work',
+            'Personal',
+            'Health',
+            'Finance',
+            'Education',
+            'Errands',
+            'Home',
+            'Social',
+            'Fitness',
+            'Hobbies',
+            'Travel',
+            'Projects',
+            'Family',
+            'Shopping',
+            'Goals'
+          )
+          .default(null),
+        isAssigned: Joi.string().valid('1', '0').default(null),
+        assignTo: Joi.string().min(3).max(30).default(null),
+      });
+      const requestObject = req.query;
+      const allRequestKeys = Object.keys(requestObject);
+      const filteredRequestObject = {};
+      for (let key of allRequestKeys) {
+        if (requestObject?.[key]) {
+          filteredRequestObject[key] = requestObject?.[key];
+        }
+      }
+  
+      const validatedData = schema.validate(filteredRequestObject);
+  
+      if (validatedData?.error) {
+        throw {
+          status: 400,
+          message: 'Bad Request',
+          error: validatedData?.error,
+        };
+      } else {
+        for (let key in validatedData.value) {
+          if (validatedData.value[key] === null) {
+            delete validatedData.value[key];
+          }
+        }
+         
+        const response = await searchTaskProcesses.filterTask(validatedData.value);
+        logger.info('🚀response: ', response);
+        res.status(200).json({
+          responseData: response,
+        });
+      }
+    } catch (error) {
+      logger.error('This is an error message.');
+      res.status(400).json({ error: error });
+    }
+  }
+);
+
 
 app.get(
   '/routes/Task-Management-system/SubSystem/SearchTask/search-task',
