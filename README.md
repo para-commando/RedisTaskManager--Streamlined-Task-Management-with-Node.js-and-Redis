@@ -12,13 +12,14 @@ This README file provides a comprehensive and sophisticated overview of the API 
 
 ## Introduction
 
+![Example Image](./shared/src/assets/introImage.jpg)
+
+
 This is a Node.js, Express.js, and Redis-implemented task management system. It allows users to create, assign, and track tasks. The system also provides features for filtering tasks, searching for tasks, and updating task details.
 
 The system is designed to be scalable and secure. It uses a microservices architecture to decouple the different components of the system. This makes it easy to scale the system as needed. The system also uses Redis to store session data, which helps to improve security.
 
 The system is easy to use. The API documentation is clear and concise, and the system provides a user-friendly interface.
-
-![Example Image](./shared/src/assets/introImage.jpg)
 
 ### Features
 
