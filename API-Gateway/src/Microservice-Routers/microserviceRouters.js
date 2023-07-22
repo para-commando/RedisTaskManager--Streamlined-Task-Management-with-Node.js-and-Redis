@@ -1,6 +1,6 @@
 const app = require('../app');
 const {
-  registerUserMiddlewares, loginUserMiddlewares, sendOtpMiddlewares, verifyOtpMiddlewares, resetPasswordMiddlewares, listTaskMiddlewares, listUsersMiddlewares, taskDetailsMiddlewares, createTaskMiddlewares, assignTaskMiddlewares
+  registerUserMiddlewares, loginUserMiddlewares, sendOtpMiddlewares, verifyOtpMiddlewares, resetPasswordMiddlewares, listTaskMiddlewares, listUsersMiddlewares, taskDetailsMiddlewares, createTaskMiddlewares, assignTaskMiddlewares, updateTaskMiddlewares
 } = require('../Middlewares/Route-Middlewares/expressRateLimit.middleware');
 const Joi = require('joi');
 const {
@@ -15,7 +15,100 @@ const {
 const {
   taskAssignmentProcesses,
 } = require('../../../sub-systems/TaskAssignment-System/Processes/process');
+const {
+  taskUpdatingProcesses,
+} = require('../../../sub-systems/TaskUpdating-System/Processes/process');
 const logger = require('../../../shared/src/configurations/logger.configurations');
+
+// * * Task Updating subsystem APIs ///////////////////////////////////
+
+app.put(
+  '/routes/Task-Management-system/SubSystem/Updating/update-task',
+  updateTaskMiddlewares.expressRateLimiterMiddleware,
+  async (req, res, next) => {
+    try {
+      const schema = Joi.object({
+        title: Joi.string().trim().max(255).required(),
+        description: Joi.string().trim().required(),
+        dueDate: Joi.string().isoDate().required(),
+        priority: Joi.string()
+          .valid('Highest', 'High', 'Medium', 'Low')
+          .required(),
+        status: Joi.string()
+          .valid('Not Started', 'In Progress', 'Completed', 'Unassigned')
+          .required(),
+        categoryId: Joi.string()
+          .valid(
+            'Work',
+            'Personal',
+            'Health',
+            'Finance',
+            'Education',
+            'Errands',
+            'Home',
+            'Social',
+            'Fitness',
+            'Hobbies',
+            'Travel',
+            'Projects',
+            'Family',
+            'Shopping',
+            'Goals'
+          )
+          .required(),
+        isAssigned: Joi.string().valid('0').required(),
+        assignTo: Joi.string().min(3).max(30).required(),
+        taskId: Joi.string()
+          .pattern(
+            new RegExp(
+              '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$'
+            )
+          )
+          .required(),
+      });
+      const validatedData = schema.validate(req.body);
+      if (validatedData?.error) {
+        throw {
+          status: 400,
+          message: 'Bad Request',
+          error: validatedData?.error,
+        };
+      } else {
+        const {
+          title,
+          description,
+          dueDate,
+          priority,
+          status,
+          categoryId,
+          isAssigned,
+          assignTo,
+          taskId,
+        } = validatedData.value;
+        const response = await taskUpdatingProcesses.updateTask({
+          title: title,
+          description: description,
+          dueDate: dueDate,
+          priority: priority,
+          status: status,
+          categoryId: categoryId,
+          isAssigned: isAssigned,
+          assignTo: assignTo,
+          taskId: taskId,
+        });
+        logger.info('🚀response: ', response);
+        res.status(200).json({
+          responseData: response,
+        });
+      }
+    } catch (error) {
+      logger.error('This is an error message.');
+      res.status(400).json({ error: error });
+    }
+  }
+);
+
+
 
 // * * Assign Task subsystem APIs ///////////////////////////////////
 
