@@ -564,7 +564,43 @@ This Subsystem contains API for searching Task, The base URL for all the endpoin
 
         5. If any error occurs during the search process, the function throws the error, propagating it further up the call stack for handling.
 
- 
+#### 2. `/filter-task`
+
+- Method: GET
+- Description: This API is used to filter tasks based on conditions such as category,priority,assignedPerson, assignment status,work status, sorting criteria..
+- Parameters:
+  - `searchKeyword` (string, required): Keywords to search for tasks.
+- Parameters:
+  - `categoryId` (query, string, optional): Filter tasks by category. Possible values: Work, Personal, Health, Finance, Education, Errands, Home, Social, Fitness, Hobbies, Travel, Projects, Family, Shopping, Goals.
+  - `priority` (query, string, optional): Filter tasks by priority. Possible values: Highest, High, Medium, Low.
+  - `assignTo` (query, string, optional): Filter tasks by assigned person. Example: Anirudh.Nayak.
+  - `isAssigned` (query, string, optional): Filter tasks by assignment status. Possible values: '0', '1'.
+  - `status` (query, string): Filter tasks by status. Possible values: Not Started, In Progress, Completed, UnAssigned, Scheduled.
+  - `sort` (query, string): Sort tasks by priority or due date.
+- Responses:
+  - `200`: Filtered tasks returned successfully.
+  - `400`: Bad request.
+  - `503`: filterTask process failed. Internal error in the process layer.
+- Sample Request URL:
+
+```
+http://localhost:3000/routes/Task-Management-system/SubSystem/SearchTask/filter-task?categoryId=Work&priority=Highest&assignTo=Anirudh.Nayak&isAssigned=1&status=In%20Progress&sort=priority```
+
+- ProcessLogic:
+
+        1. The function first checks if the `filterConditions` object has any values.
+
+        2. If it does, the function iterates through the `filterConditions` object and creates a Lua script that will be used to filter the tasks.
+
+        3. The Lua script uses the `redis.call()` method to get all the keys that start with `task:`.
+
+        4. The Lua script then iterates through the keys and checks if the task meets the conditions specified in the `filterConditions` object.
+
+        5. If the task meets the conditions, the Lua script adds the task to a list of matching tasks.
+
+        6. The function then calls the `redis.eval()` method to execute the Lua script.
+        
+        7. The function then returns a list of matching tasks.
 
 ## Features
 
