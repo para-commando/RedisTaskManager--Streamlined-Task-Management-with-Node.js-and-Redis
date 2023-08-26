@@ -588,7 +588,7 @@ This Subsystem contains API for searching Task, The base URL for all the endpoin
 
 ```
 http://localhost:3000/routes/Task-Management-system/SubSystem/SearchTask/filter-task?categoryId=Work&priority=Highest&assignTo=Anirudh.Nayak&isAssigned=1&status=In%20Progress&sort=priority```
-
+```
 - ProcessLogic:
 
         1. The function first checks if the `filterConditions` object has any values.
@@ -620,12 +620,12 @@ To get started with the project, follow these steps:
 
 1. Clone the repository:
 ```  
-   git clone https://github.com/anirudh-nayak-172k/Backend-Microservice -Architecture.git
+   git clone https://github.com/anirudh-nayak-172k/RedisTaskManager--Streamlined-Task-Management-with-Node.js-and-Redis.git
 ```  
 
 2 . Navigate to the Directory and install the dependencies:
 ```
-    cd Backend-Microservice-Architecture
+  cd RedisTaskManager--Streamlined-Task-Management-with-Node.js-and-Redis
     npm install
 ```
 
@@ -651,55 +651,61 @@ Each service exposes its own set of APIs.
    
 ```
 ## Directory Structure
-
-    server
-        ├── API-Gateway
-        │   └── src
-        │       ├── app.js
-        │       ├── Microservice-Routers
-        │       │   └── microserviceRouters.js
-        │       └── Middlewares
-        │           ├── Gateway-Middlewares
-        │           │   ├── ddos.middleware.js
-        │           │   ├── helmet.middleware.js
-        │           │   ├── jwt.middleware.js
-        │           │   ├── morgan.middleware.js
-        │           │   └── responseTime.middleware.js
-        │           └── Route-Middlewares
-        │               └── expressRateLimit.middleware.js
-        |
-        ├── shared
-        │   └── src
-        │       ├── configurations
-        │       │   ├── logger.configurations.js
-        │       │   └── redis.configurations.js
-        │       ├── constants
-        │       │   └── constants.js
-        │       ├── models
-        │       │   └── models.js
-        │       └── utilities
-        │           └── utilities.js
-        |── sub-systems
-        |    ├── Microservice-1
-        |    │   ├── Processes
-        |    │   │   └── process.js
-        |    │   └── Process-Mappers
-        |    │       └── processMappers.js
-        |    ├── Microservice-2
-        |    │   ├── Processes
-        |    │   │   └── process.js
-        |    │   └── Process-Mappers
-        |    │       └── processMappers.js
-        |    └── Microservice-3
-        |        ├── Processes
-        |        │   └── process.js
-        |        └── Process-Mappers
-        |            └── processMappers.js
-        |
-        ├── ecosystem.config.js
-        ├── package.json
-        ├── package-lock.json
-
+```
+    |── server
+    ├── API-Gateway
+    │   └── src
+    │       ├── app.js
+    │       ├── Microservice-Routers
+    │       │   └── microserviceRouters.js
+    │       └── Middlewares
+    │           ├── Gateway-Middlewares
+    │           │   ├── ddos.middleware.js
+    │           │   ├── helmet.middleware.js
+    │           │   ├── jwt.middleware.js
+    │           │   ├── morgan.middleware.js
+    │           │   └── responseTime.middleware.js
+    │           └── Route-Middlewares
+    │               └── expressRateLimit.middleware.js
+    ├── ecosystem.config.js
+    ├── package.json
+    ├── package-lock.json
+    ├── README.md
+    ├── shared
+    │   └── src
+    │       ├── assets
+    │       │   └── introImage.jpg
+    │       ├── configurations
+    │       │   ├── logger.configurations.js
+    │       │   ├── Otp.configurations.js
+    │       │   ├── redis.configurations.js
+    │       │   └── twilioServices.configurations.js
+    │       ├── constants
+    │       │   └── constants.js
+    │       ├── models
+    │       │   └── models.js
+    │       └── utilities
+    │           └── utilities.js
+    └── sub-systems
+        ├── Authentication-System
+        │   └── Processes
+        │       └── process.js
+        ├── Listing-System
+        │   └── Processes
+        │       └── process.js
+        ├── SearchTask-System
+        │   └── Processes
+        │       └── process.js
+        ├── TaskAssignment-System
+        │   └── Processes
+        │       └── process.js
+        ├── TaskCreation-System
+        │   └── Processes
+        │       └── process.js
+        └── TaskUpdating-System
+            └── Processes
+                └── process.js
+```
 ## Scripts
 
     npm startDev: Starts the services using PM2 in development mode.
