@@ -12,7 +12,8 @@ This README file provides a comprehensive and sophisticated overview of the API 
 
 ## Introduction
 
-![Example Image](./shared/src/assets/introImage.jpg)
+![introImage](https://github.com/anirudh-nayak-172k/RedisTaskManager--Streamlined-Task-Management-with-Node.js-and-Redis/assets/123434846/62dcd1fc-4d20-4c3b-a5ff-9e40cce00979)
+
 
 
 This is a Node.js, Express.js, and Redis-implemented task management system. It allows users to create, assign, and track tasks. The system also provides features for filtering tasks, searching for tasks, and updating task details.
